@@ -1,9 +1,6 @@
-
 const express = require('express');
 const bs = require('body-parser');
-const validation = require('./components/core/validator');
-
-
+const mongoose = require('mongoose');
 
 const AppConfigs = require('./components/settings/configs');
 

@@ -2,17 +2,15 @@ const express = require('express');
 const ServicesRouter = express.Router();
 const bs = require('body-parser');
 const mongoose = require('mongoose');
-const validation = require('./components/core/validator');
-const Settings = require('./settings');
-const HTTPStatus = require('./settings');
-const Config = require('./settings');
-const Key = require('./key');
-const Model = require('./model');
-const Constantss = require('./constants');
+const validation = require('../core/validator');
+const Settings = require('../settings/status');
+const AppConfigs = require('../settings/configs');
+const Key = require('../services/key');
+const Constantss = require('../settings/constants');
 const Path =  require('path');
 const multer  = require('multer');
-const ServiceSchema = require('./model');
-const services_db = mongoose.createConnection("mongodb://localhost:27017/services", { useNewUrlParser: true });
+const ServiceSchema = require('../services/private/model');
+const services_db = require('../core/db');
 const services = services_db.model('services', ServiceSchema);
 
 const app = express();
@@ -37,7 +35,7 @@ app.use(bs.urlencoded({extended: false}));
     }
   }).single('photo');
 
-app.post('/upload/:id',(req, res) => {
+ServicesRouter.post('/upload/:id',(req, res) => {
     if (!req.params.id) return res.send({success:false,msg:'Id not exist'}).status(Settings.HTTPStatus.PARAMS_INVALID);
     upload(req,res,(err) => {
         if (err) return res.send({success:false,msg:err}).status(Settings.HTTPStatus.INTERNAL_SERVER_ERROR);
@@ -54,7 +52,7 @@ app.post('/upload/:id',(req, res) => {
         });
       });
     });
-app.get('/services', (req, res) => {
+ServicesRouter.get('/', (req, res) => {
         if (!req.params) return res.send('no params').status(Settings.HTTPStatus.NOT_FOUND);
     services.find({
       }, (err, result) => {
@@ -63,7 +61,7 @@ app.get('/services', (req, res) => {
       });
     });
 
-app.get('/services/:id', (req, res) => {
+ServicesRouter.get('/:id', (req, res) => {
       let id = req.params.id;
         if (!id) return res.send({success:false,msg:'Id not exist'}).status(Settings.HTTPStatus.NOT_FOUND);
     services.findOne({
@@ -74,7 +72,7 @@ app.get('/services/:id', (req, res) => {
       });
     });
 
-app.post('/services', (req, res) => {
+ServicesRouter.post('/', (req, res) => {
     if (req.body.name && req.body.address && req.body.phone && req.body.rating) {
         if (!validation.validateName(req.body.name)) {
         return res.send('no name');
@@ -106,7 +104,7 @@ app.post('/services', (req, res) => {
      }
    });
 
-app.put('/services/:id',Key ,(req, res) => {
+ServicesRouter.put('/:id',Key ,(req, res) => {
     let id = req.params.id;
     let queryObject = {};
       if (req.body.name && req.body.name.length) {
@@ -135,7 +133,7 @@ app.put('/services/:id',Key ,(req, res) => {
         }
     });
 
-app.delete('/services/:id', (req, res) => {
+ServicesRouter.delete('/:id', (req, res) => {
       let adminID = req.params.id;
       let serviceToDelete = req.body.id;
     services.findOne({

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Settings = require('./settings');
+const Settings = require('../../settings/status');
 const keygen = require('keygenerator');
 const Constants = require('constants');
 
@@ -40,7 +40,10 @@ const UserSchema = new mongoose.Schema( {
     default: null,
     required: false
   },
-  email:  String,
+  email:  {
+    type: String,
+    unique: false
+  },
   age: Number
 });
 module.exports = UserSchema;

@@ -15,4 +15,4 @@ module.exports = {
             ROOT: 'root'
             },
         user_role_values: ['user', 'admin', 'moderator', 'editor', 'root']
-      };
+};

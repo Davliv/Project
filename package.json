@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Davliv/servizio.git"
+    "url": "git+https://github.com/Davliv/project.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-      "url": "https://github.com/Davliv/servizio/issues"
+    "url": "https://github.com/Davliv/project/issues"
   },
-  "homepage": "https://github.com/Davliv/servizio#readme",
+  "homepage": "https://github.com/Davliv/project#readme",
   "dependencies": {
     "append-field": "^1.0.0",
     "bleach": "^0.3.0",

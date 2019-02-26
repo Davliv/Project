@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Settings = require('./settings');
+const Settings = require('../../settings/status');
 const keygen = require('keygenerator');
 const Constants = require('constants');
 

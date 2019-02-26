@@ -2,17 +2,15 @@ const express = require('express');
 const UsersRouter = express.Router();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const validation = require('./components/core/validator');
-const Settings = require('./settings');
-const HTTPStatus = require('./settings');
-const Config = require('./settings');
-const Key = require('./key');
-const Model = require('./model');
+const validation = require('../core/validator');
+const Settings = require('../settings/status');
+const AppConfigs = require('../settings/configs');
+const Key = require('../users/key');
+const Constantss = require('../settings/constants');
 const Path =  require('path');
 const multer  = require('multer');
-const Userschema = require('./model');
-const Constantss = require('./constants');
-const users_db = mongoose.createConnection("mongodb://localhost:27017/users", { useNewUrlParser: true });
+const Userschema = require('../users/private/model');
+const users_db = require('../core/db');
 const users = users_db.model('users', Userschema);
 
 const app = express();
@@ -20,6 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 //Set Storage engine
+
 const storage = multer.diskStorage({
     destination: './uploads',
     filename: (req,file,cb) => {
@@ -39,7 +38,7 @@ const upload = multer({
   }
 }).single('avatar');
 
-app.post('/upload/:id',(req, res) => {
+UsersRouter.post('/upload/:id',(req, res) => {
     if (!req.params.id) return res.send({success:false,msg:'Id not exist'}).status(Settings.HTTPStatus.PARAMS_INVALID);
     upload(req,res,(err) => {
         if (err) return res.send({success:false,msg:err}).status(Settings.HTTPStatus.INTERNAL_SERVER_ERROR);
@@ -57,7 +56,7 @@ app.post('/upload/:id',(req, res) => {
       });
     });
 
-app.get('/users', (req, res) => {
+UsersRouter.get('/', (req, res) => {
         if (!req.query) return res.send('no query').status(Settings.HTTPStatus.NOT_FOUND);
         let q = req.query.q;
   users.find({ $or:[ {'username': new RegExp(q,'i')}, {'email':new RegExp(q,'i')}]},
@@ -67,7 +66,7 @@ app.get('/users', (req, res) => {
     });
   });
 
-app.post('/users', (req, res) => {
+UsersRouter.post('/', (req, res) => {
       if (req.body.username && req.body.password && req.body.email && req.body.age) {
         if (!validation.validateEmail(req.body.email)) {
           return res.send('no email');
@@ -93,13 +92,13 @@ app.post('/users', (req, res) => {
           age: req.body.age,
           role: req.body.role
       }, (err, result) => {
-        if (err) return res.send({success:false,msg:'Server error'}).status(Settings.HTTPStatus.INTERNAL_SERVER_ERROR);
+        if (err) return res.send({success:false,msg:err}).status(Settings.HTTPStatus.INTERNAL_SERVER_ERROR);
         return res.send({success:true,msg:'User created'}).status(Settings.HTTPStatus.OK);
       });
     }
  });
 
-app.get('/users/:id', (req, res) => {
+UsersRouter.get('/:id', (req, res) => {
   let id = req.params.id;
         if (!id) return res.send({success:false,msg:'Id not exist'}).status(Settings.HTTPStatus.NOT_FOUND);
         if (!(id.match(/^[0-9a-fA-F]{24}$/))) return res.send({success:false,msg:'Id is not valid'}).status(Settings.HTTPStatus.NOT_FOUND);
@@ -108,11 +107,11 @@ app.get('/users/:id', (req, res) => {
     }, (err, result) => {
         if (err) return res.send({success:false,msg:'Server error'}).status(Settings.HTTPStatus.INTERNAL_SERVER_ERROR);
         if (!result) return res.send({success:false,msg:'User not found'}).status(Settings.HTTPStatus.NOT_FOUND);
-        return res.send(result).status(HTTPStatus.OK);
+        return res.send(result).status(Settings.HTTPStatus.OK);
     });
   });
 
-app.put('/users/:id',Key ,(req, res) => {
+UsersRouter.put('/:id',Key ,(req, res) => {
   let id = req.params.id;
   let queryObject = {};
         if (req.body.username && req.body.username.length) {
@@ -140,7 +139,7 @@ app.put('/users/:id',Key ,(req, res) => {
           return res.send('empty form');
        }
     });
-app.delete('/users/:id', (req, res) => {
+UsersRouter.delete('/:id', (req, res) => {
     let adminID = req.params.id;
     let userToDelete = req.body.id;
    users.findOne({
